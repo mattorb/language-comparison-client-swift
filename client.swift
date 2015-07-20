@@ -1,4 +1,3 @@
-#!/usr/bin/env xcrun swift
 //
 //  client.swift
 //  client-swift
@@ -30,17 +29,17 @@ class Client {
         }
         task!.resume()
     }
-    
+
     func parseToJSONDictionary(data: NSData, completionHandler: (JSONDictionary?, NSError?) -> Void) {
         do {
             let json = try NSJSONSerialization.JSONObjectWithData(data, options: []) as? JSONDictionary
             completionHandler(json, nil)
         } catch let jsonError as NSError {
-            print("Error parsing JSON: \(jsonError)")
+            NSLog("Error parsing JSON: \(jsonError)")
             completionHandler(nil, jsonError)
         }
     }
-    
+
     func parse(data: NSData, completionHandler: (Payload?) -> Void) {
         parseToJSONDictionary(data) { json, error in
             if (json != nil) {
@@ -58,12 +57,12 @@ struct Payload {
     let theBestNumber: Int
     let pi: Double
     let timestamp: NSDate
-    
+
     init(fromJSONDictionary json: JSONDictionary) {
         self.init(name: json["name"] as! String,
-         theBestNumber: json["best_number"] as! Int,
-                    pi: json["pi"] as! Double,
-             timestamp: dateFormatter().dateFromString(json["right_now"] as! String)!)
+            theBestNumber: json["best_number"] as! Int,
+            pi: json["pi"] as! Double,
+            timestamp: dateFormatter().dateFromString(json["right_now"] as! String)!)
     }
     init(name: String, theBestNumber: Int, pi: Double, timestamp: NSDate) {
         self.name = name
@@ -72,24 +71,3 @@ struct Payload {
         self.timestamp = timestamp
     }
 }
-
-func currentTimeMillis() -> Int64{
-    let nowDouble = NSDate().timeIntervalSince1970
-    return Int64(nowDouble*1000)
-}
-
-print(currentTimeMillis())
-for i in 0..<100 {
-    let client = Client()
-    client.getRequest { (response, data, error) -> Void in
-        if (data != nil) {
-            client.parse(data!, completionHandler: { payload in
-                print("Typed response: \(payload!)")
-            })
-        } else {
-            print("Error: \(error!)")
-        }
-    }
-}
-print(currentTimeMillis())
-NSRunLoop.currentRunLoop().run()
